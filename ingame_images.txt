@@ -53,3 +53,6 @@ LOSS_Fighter_Squadron_CIS, nighthawk.png
 Allocator_Destroyer_CIS, allocator.png
 Sabaoth_Destroyer_CIS, sabaoth_cis.png
 Geonosian_Cruiser_CIS, geonosian.png, geonosian2.png
+Warlord_Corvette_Group, WarlordPatrolCraft.png
+Reaper_Z95CVMR_Fighter_Squadron, ReaperSquadron.png
+R32X_Interceptor_Squadron_G, R32X.png
