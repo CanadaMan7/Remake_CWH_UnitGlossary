@@ -1,5 +1,5 @@
 title=Unit roster for EAW Remake: Clone Wars Holdouts
-description=A complete guide for buildable units and heroes (for now, space only) in the following mods set for Star Wars Empire at War, Force of Corruption:
+description=A complete guide for buildable units and heroes (for now, space only) in the following mod set for Star Wars Empire at War, Force of Corruption:
 
 <a href="https://steamcommunity.com/workshop/filedetails/?id=1770851727">Remake 4.0</a>
 
@@ -7,5 +7,5 @@ description=A complete guide for buildable units and heroes (for now, space only
 
 Please help out by submitting your in-game screenshots either of specific units or of general gameplay. Please join us on <a href="https://discord.gg/6PF5StA2wp">Discord</a>.
 
-author=Contributors to this guide: Ripoblus, Sling Blade, KarlGerat-05 Loki, RevanInHeaven
-Github link: <a href="https://github.com/ripoblus858-droid/eaw-unit-glossary">https://github.com/ripoblus858-droid/eaw-unit-glossary</a>
+author=Contributors to this guide: Ripoblus, CanadaMan7, Sling Blade, KarlGerat-05 Loki, RevanInHeaven
+Github link: <a href="https://github.com/CanadaMan7/Remake_CWH_UnitGlossary">https://github.com/CanadaMan7/Remake_CWH_UnitGlossary</a>
