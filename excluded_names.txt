@@ -319,3 +319,6 @@ Underworld_Small_Transport_RZ52
 Liberator_Carrier_MP_2
 Gozanti_Squadron
 Panaka_Arquitens
+TIE_Fighter_Garrison_#4
+DP-20_Squadron
+TIE_Defender_Elite_Garrison_Container

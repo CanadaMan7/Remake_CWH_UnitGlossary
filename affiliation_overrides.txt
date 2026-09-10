@@ -236,3 +236,4 @@ Savage_Destroyer_Crimson_Dawn,Underworld
 Interceptor_IV_Dryden_Vos,Underworld
 Acclamator_II_Wack,Rebel
 I_Wing_Red_Squadron_HC,Cartels,Neutral
+Avenger_Star_Destroyer,Empire
