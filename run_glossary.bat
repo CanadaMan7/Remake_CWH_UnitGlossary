@@ -22,6 +22,20 @@ python generate_glossary.py ^
 	--mod-icon "faction_images\EAWCWHSteam.png" ^
 	--gameplay-image "faction_images\eaw_orbital.png" ^
 	--unit-order glossary_unit_order.txt ^
+	--structures-dirs ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Xml\Buildings" ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Xml\Buildings" ^
+	--structure-name-overrides structure_name_overrides.txt ^
+	--story-scripts-dirs ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Scripts\Story" ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Scripts\Story" ^
+	--easter-eggs-file easter_eggs.txt ^
+	--upgrade-scripts-dirs ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Scripts\GameObject" ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Scripts\GameObject" ^
+	--galaxy-data-dirs ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Xml" ^
+	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Xml" ^
 	--prune-unused-images unused_png_images
 
 pause

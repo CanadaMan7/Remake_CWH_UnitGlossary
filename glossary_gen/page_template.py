@@ -25,11 +25,22 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <style>{styles}</style>
 </head>
 <body>
+<a class="home-button" href="{home_href}">&#8962; Home</a>
 <h1>{title_html}</h1>
 <h2>Unit Glossary</h2>
 <div class="controls">
   <input id="search" type="text" placeholder="Search by name...">
+  <label class="sort-control">Sort by
+    <select id="sort-select">
+      <option value="default">Default (by file)</option>
+      <option value="alpha">Alphabetical</option>
+      <option value="class">Unit Class</option>
+      <option value="tech">Tech level</option>
+    </select>
+  </label>
 </div>
+{galaxy_controls}
+{limits_summary}
 {filters}
 <div class="count">{count} entries</div>
 <div id="groups">
@@ -39,6 +50,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <button type="button" class="image-modal-close" onclick="closeImageModal()">Close &times;</button>
   <img id="image-modal-img" class="image-modal-img" src="" alt="In-game screenshot">
 </div>
+{galaxy_data}
 <script>{script}</script>
 </body>
 </html>
@@ -70,10 +82,7 @@ SPLASH_TEMPLATE = """<!DOCTYPE html>
 </div>
 {description}
 {gameplay_image}
-<div class="splash-section-title">Choose a faction</div>
-<div class="splash-faction-grid">
 {faction_cards}
-</div>
 </body>
 </html>
 """

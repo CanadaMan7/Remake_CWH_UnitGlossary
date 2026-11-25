@@ -1,0 +1,7 @@
+# Display names for structures listed in a unit's Required_Special_Structures.
+# One "Internal_Name = Display name" per line. These win over the in-game name the
+# generator finds automatically via --structures-dirs, so only add a line when a
+# card's "Requires" chip still shows a raw ID or the in-game name is ambiguous.
+#
+# Example:
+# U_Shipyard_3 = Major Construction Yard (Underworld)

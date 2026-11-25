@@ -8,6 +8,11 @@
   body { font-family: system-ui, sans-serif; background:#12141a; color:#e7e9ee; margin:0; padding:24px; }
   h1 { margin-top:0; }
   .controls { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .file-group.sorted-away { display:none !important; }
+  .sort-control { display:flex; align-items:center; gap:8px; color:#9aa0ad; font-size:0.9em; }
+  .sort-control select {
+    background:#1c1f28; color:#e7e9ee; border:1px solid #333; border-radius:6px; padding:8px 10px; font-size:1em;
+  }
   .controls input {
     background:#1c1f28; color:#e7e9ee; border:1px solid #333; border-radius:6px; padding:8px 10px;
     min-width:240px;
@@ -212,7 +217,119 @@
   }
   .stat-label { color:#9aa0ad; overflow-wrap:break-word; min-width:0; }
   .stat-value { text-align:right; font-weight:500; overflow-wrap:break-word; min-width:0; }
-  .stat-value-missing { color:#c9a24a; font-weight:400; font-style:italic; }
+  .stat-value-missing { color:#5c6170; font-weight:400; cursor:help; }
+
+  /* Build requirements panel (see build_rules.render_build_panel) --
+     sits directly under the card title so limits/restrictions are
+     the first thing read, as labelled chips. Colour carries meaning
+     only redundantly: every chip also has a text label. */
+  .row-build {
+    margin:6px 0 10px; padding:8px 10px; background:#171a22;
+    border:1px solid #2c2f3a; border-left:3px solid #4a6fa5; border-radius:6px;
+  }
+  .row-build-title {
+    font-size:0.68em; color:#7d8290; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.04em; margin-bottom:6px;
+  }
+  .build-line { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .build-line + .build-line { margin-top:6px; padding-top:6px; border-top:1px dashed #2c2f3a; }
+  .build-line-caption { font-size:0.75em; color:#9aa0ad; font-weight:600; min-width:100%; }
+  .build-chip {
+    display:inline-flex; align-items:baseline; gap:6px; font-size:0.82em;
+    padding:3px 9px; border-radius:12px; background:#1f2330; border:1px solid #333847;
+  }
+  .build-chip-label { color:#8a8f9c; font-size:0.9em; }
+  .build-chip-value { color:#e7e9ee; font-weight:600; }
+  .build-chip--limit { background:#3a2a14; border-color:#8a6420; }
+  .build-chip--limit .build-chip-value { color:#f2c66d; }
+  .build-chip--req { background:#1b2a3d; border-color:#34557d; }
+  .build-chip--locked { background:#3a1c22; border-color:#7d3440; }
+  .build-chip--locked .build-chip-value { color:#f09aa6; }
+  .build-chip--muted .build-chip-value { color:#8a8f9c; font-weight:400; }
+  .build-chip--era { background:#262033; border-color:#5b4a85; }
+  .build-line--era + .build-line { border-top:none; padding-top:0; }
+  .build-chip--era .build-chip-value { color:#c9b8f0; }
+
+  /* At-a-glance table of build-limited units, top of each faction page. */
+  .limits-summary {
+    margin:0 0 16px; background:#181b22; border:1px solid #2c2f3a; border-radius:8px; padding:8px 12px;
+  }
+  .limits-summary summary { cursor:pointer; font-weight:600; color:#f2c66d; }
+  .limits-count { color:#8a8f9c; font-weight:400; }
+  .limits-table { border-collapse:collapse; width:100%; margin-top:8px; font-size:0.85em; }
+  .limits-table th { text-align:left; color:#8a8f9c; font-weight:600; border-bottom:1px solid #2c2f3a; padding:4px 8px; }
+  .limits-table td { padding:4px 8px; border-bottom:1px solid #1f2330; vertical-align:top; color:#c7cad1; }
+  .limits-table td a { color:#8fb8e8; text-decoration:none; }
+  .limits-table td a:hover { text-decoration:underline; }
+  .limits-limit { color:#f2c66d; white-space:nowrap; }
+  .row:target { outline:2px solid #f2c66d; outline-offset:2px; }
+
+  /* "Home" link back to the intro page, top-right of each faction page. */
+  body { position:relative; }
+  .home-button {
+    position:absolute; top:24px; right:24px;
+    background:#1c1f28; color:#e7e9ee; border:1px solid #333; border-radius:6px;
+    padding:8px 14px; font-size:0.9em; text-decoration:none;
+  }
+  .home-button:hover { background:#28405e; border-color:#4a6fa5; }
+
+  /* Galactic Map (galaxy.py; drawn by page_script.py). Replaces a
+     squadron's formation box, and sits as a right-hand column on other
+     cards. Recruitable planets are bright, others faint; a ring marks
+     this faction's starting planets in the selected campaign. */
+  .campaign-control {
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 14px;
+    font-size:0.85em; color:#9aa0ad;
+  }
+  .campaign-control select {
+    background:#1c1f28; color:#e7e9ee; border:1px solid #333; border-radius:6px; padding:6px 8px; font-size:1em;
+  }
+  .campaign-legend { display:inline-flex; align-items:center; gap:6px; color:#8a8f9c; }
+  .lg-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-left:8px; }
+  .lg-ok { background:#6fd3a8; }
+  .lg-no { background:#3d4250; }
+  .lg-own { border:1.5px solid #f2c66d; width:8px; height:8px; }
+  .row-map-col:empty { display:none; }
+  .row-map-col { flex:0 0 auto; }
+  .map-box {
+    box-sizing:border-box; width:262px;
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px;
+    background:#181b22; border:1px solid #2c2f3a; border-radius:8px;
+  }
+  .galaxy-svg { width:244px; height:244px; display:block; background:#0f1117; border-radius:6px; cursor:crosshair; }
+  .gm-route { fill:none; stroke:#4a5064; stroke-width:0.9; stroke-opacity:0.35; vector-effect:non-scaling-stroke; }
+  .gm-route-main { stroke-opacity:0.6; stroke-width:1.2; }
+  .gm-no { fill:#3d4250; }
+  .gm-ok { fill:#6fd3a8; }
+  .gm-halo { fill:#6fd3a8; fill-opacity:0.22; }
+  .gm-own { fill:none; stroke:#f2c66d; stroke-width:1.3; vector-effect:non-scaling-stroke; }
+  .map-caption { font-size:0.76em; color:#c7cad1; text-align:center; line-height:1.35; }
+  .map-caption--none { color:#f09aa6; }
+  .map-hover { font-size:0.72em; color:#8a8f9c; text-align:center; min-height:1.2em; }
+  .map-note { font-size:0.7em; color:#8a8f9c; text-align:center; display:flex; align-items:center; gap:5px; }
+  .map-note .lg-dot { margin-left:0; flex:0 0 auto; }
+  .lg-start { background:#8fb8e8; }
+  .lg-upg { background:#e05252; }
+  .gm-upg { fill:#e05252; fill-opacity:0.25; stroke:#e05252; stroke-width:1.6; vector-effect:non-scaling-stroke; }
+  /* Forms & upgrades panel (upgrades.render_upgrade_panel) */
+  .row-upgrades { border-left-color:#8a5bd1; }
+  .upg-chain { font-size:0.85em; color:#c7cad1; margin-bottom:8px; line-height:1.6; }
+  .upg-chain a, .upg-head a { color:#8fb8e8; text-decoration:none; }
+  .upg-chain a:hover, .upg-head a:hover { text-decoration:underline; }
+  .upg-chain strong { color:#f2f3f5; }
+  .upg-arrow { color:#8a5bd1; margin:0 4px; }
+  .upg-step + .upg-step { margin-top:8px; padding-top:8px; border-top:1px dashed #2c2f3a; }
+  .upg-head { font-size:0.85em; color:#e7e9ee; font-weight:600; margin-bottom:5px; }
+  .upg-via { color:#8a8f9c; font-weight:400; }
+  .build-chip--upg-planet { background:#3a1c1c; border-color:#a33a3a; }
+  .build-chip--upg-planet .build-chip-value { color:#f29a9a; }
+  .gm-start { fill:#8fb8e8; stroke:#0f1117; stroke-width:1; vector-effect:non-scaling-stroke; }
+  .map-campaign {
+    width:100%; box-sizing:border-box; background:#1c1f28; color:#e7e9ee; border:1px solid #333;
+    border-radius:6px; padding:4px 6px; font-size:0.78em;
+  }
+  .map-box--unavailable .galaxy-svg { opacity:0.45; }
+  .campaign-hint { color:#6b7280; font-size:0.9em; }
   .tier { font-size:0.82em; border-top:1px solid #2c2f3a; padding:5px 0; }
   .tier div { color:#9aa0ad; }
   .note { font-size:0.76em; color:#c9a24a; margin:4px 0 0; }
@@ -417,7 +534,7 @@
      minimum card width. */
   .splash-faction-grid {
     display:grid; grid-template-columns:repeat(6, 1fr);
-    gap:14px; max-width:900px;
+    gap:14px; max-width:900px; margin-bottom:26px;
   }
   .splash-faction-card {
     display:flex; flex-direction:column; align-items:center; text-align:center;
@@ -446,9 +563,6 @@ Github link: <a href="https://github.com/CanadaMan7/Remake_CWH_UnitGlossary">htt
 </div>
 <div class='splash-description'><p>A complete guide for buildable units and heroes (for now, space only) in the following mod set for Star Wars Empire at War, Force of Corruption:</p><p><a href="https://steamcommunity.com/workshop/filedetails/?id=1770851727">Remake 4.0</a></p><p><a href="https://steamcommunity.com/workshop/filedetails/?id=2794270450">Clone Wars Holdout Factions Submod</a></p><p>Please help out by submitting your in-game screenshots either of specific units or of general gameplay. Please join us on <a href="https://discord.gg/6PF5StA2wp">Discord</a>.</p></div>
 <div class='splash-gameplay-image'><img src='faction_images/eaw_orbital.png' alt='Gameplay screenshot'></div>
-<div class="splash-section-title">Choose a faction</div>
-<div class="splash-faction-grid">
-<a class='splash-faction-card' href='index_cartels.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Desilijic_clan_vector.png' alt='Hutt Cartels'></div><div class='splash-faction-name'>Hutt Cartels</div><div class='splash-faction-count'>15 entries</div></a><a class='splash-faction-card' href='index_cis.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/CIS_roundel.png' alt='Confederacy of Independent Systems'></div><div class='splash-faction-name'>Confederacy of Independent Systems</div><div class='splash-faction-count'>99 entries</div></a><a class='splash-faction-card' href='index_csa.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/CSAcolor.png' alt='Corporate Sector Authority'></div><div class='splash-faction-name'>Corporate Sector Authority</div><div class='splash-faction-count'>19 entries</div></a><a class='splash-faction-card' href='index_empire.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Imperial_Emblem_white.png' alt='Galactic Empire'></div><div class='splash-faction-name'>Galactic Empire</div><div class='splash-faction-count'>138 entries</div></a><a class='splash-faction-card' href='index_hapan.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Hapes_Consortium.png' alt='Hapes Consortium'></div><div class='splash-faction-name'>Hapes Consortium</div><div class='splash-faction-count'>6 entries</div></a><a class='splash-faction-card' href='index_mandalorians.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/JaingHead_darkgreen.png' alt='Mandalorians'></div><div class='splash-faction-name'>Mandalorians</div><div class='splash-faction-count'>9 entries</div></a><a class='splash-faction-card' href='index_neutral.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Blacksun.png' alt='Pirates'></div><div class='splash-faction-name'>Pirates</div><div class='splash-faction-count'>82 entries</div></a><a class='splash-faction-card' href='index_rebel.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Redstarbird.png' alt='Rebel Alliance'></div><div class='splash-faction-name'>Rebel Alliance</div><div class='splash-faction-count'>147 entries</div></a><a class='splash-faction-card' href='index_republic.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Republic_Emblem.png' alt='Galactic Republic'></div><div class='splash-faction-name'>Galactic Republic</div><div class='splash-faction-count'>91 entries</div></a><a class='splash-faction-card' href='index_sith.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Revanchist_Sith_maroon.png' alt='Sith Empire'></div><div class='splash-faction-name'>Sith Empire</div><div class='splash-faction-count'>12 entries</div></a><a class='splash-faction-card' href='index_underworld.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Zann_Consortium.png' alt='Underworld'></div><div class='splash-faction-name'>Underworld</div><div class='splash-faction-count'>143 entries</div></a><a class='splash-faction-card' href='index_warlords.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/TarkinInitiative.png' alt='Imperial Warlords'></div><div class='splash-faction-name'>Imperial Warlords</div><div class='splash-faction-count'>32 entries</div></a>
-</div>
+<div class='splash-section-title'>Major Factions</div><div class='splash-faction-grid' style='grid-template-columns:repeat(5, 1fr)'><a class='splash-faction-card' href='index_empire.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Imperial_Emblem_white.png' alt='Galactic Empire'></div><div class='splash-faction-name'>Galactic Empire</div><div class='splash-faction-count'>138 entries</div></a><a class='splash-faction-card' href='index_rebel.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Redstarbird.png' alt='Rebel Alliance'></div><div class='splash-faction-name'>Rebel Alliance</div><div class='splash-faction-count'>147 entries</div></a><a class='splash-faction-card' href='index_underworld.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Zann_Consortium.png' alt='Underworld'></div><div class='splash-faction-name'>Underworld</div><div class='splash-faction-count'>143 entries</div></a><a class='splash-faction-card' href='index_republic.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Republic_Emblem.png' alt='Galactic Republic'></div><div class='splash-faction-name'>Galactic Republic</div><div class='splash-faction-count'>90 entries</div></a><a class='splash-faction-card' href='index_cis.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/CIS_roundel.png' alt='Confederacy of Independent Systems'></div><div class='splash-faction-name'>Confederacy of Independent Systems</div><div class='splash-faction-count'>99 entries</div></a></div><div class='splash-section-title'>Minor Factions</div><div class='splash-faction-grid' style='grid-template-columns:repeat(7, 1fr)'><a class='splash-faction-card' href='index_neutral.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Blacksun.png' alt='Pirates'></div><div class='splash-faction-name'>Pirates</div><div class='splash-faction-count'>82 entries</div></a><a class='splash-faction-card' href='index_cartels.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Desilijic_clan_vector.png' alt='Hutt Cartels'></div><div class='splash-faction-name'>Hutt Cartels</div><div class='splash-faction-count'>15 entries</div></a><a class='splash-faction-card' href='index_mandalorians.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/JaingHead_darkgreen.png' alt='Mandalorians'></div><div class='splash-faction-name'>Mandalorians</div><div class='splash-faction-count'>9 entries</div></a><a class='splash-faction-card' href='index_sith.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Revanchist_Sith_maroon.png' alt='Sith Empire'></div><div class='splash-faction-name'>Sith Empire</div><div class='splash-faction-count'>12 entries</div></a><a class='splash-faction-card' href='index_csa.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/CSAcolor.png' alt='Corporate Sector Authority'></div><div class='splash-faction-name'>Corporate Sector Authority</div><div class='splash-faction-count'>19 entries</div></a><a class='splash-faction-card' href='index_hapan.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/Hapes_Consortium.png' alt='Hapes Consortium'></div><div class='splash-faction-name'>Hapes Consortium</div><div class='splash-faction-count'>6 entries</div></a><a class='splash-faction-card' href='index_warlords.html'><div class='splash-faction-logo-wrap'><img class='splash-faction-logo' src='faction_images/TarkinInitiative.png' alt='Imperial Warlords'></div><div class='splash-faction-name'>Imperial Warlords</div><div class='splash-faction-count'>32 entries</div></a></div>
 </body>
 </html>

@@ -93,6 +93,10 @@ from .xml_io import (
     DEFAULT_EXCLUDED_NAMES_PATH,
 )
 from .render import resolve_images_base
+from .build_rules import load_structure_names, load_structure_name_overrides
+from .galaxy import load_galaxy
+from .eras import load_eras
+from .upgrades import load_upgrade_links
 from .html_output import generate_html
 
 
@@ -306,6 +310,37 @@ def main():
                           "when it's genuinely distinct from every fighter's own icon. Off by "
                           "default -- only needed if that auto-detection picks the wrong "
                           "answer for a specific squadron.")
+    ap.add_argument("--structures-dirs", nargs="*", default=[],
+                     help="Directories holding structure XML (e.g. ...\\Data\\Xml\\Buildings), in "
+                          "override order. Used only to show the in-game name of a unit's "
+                          "Required_Special_Structures (e.g. U_Shipyard_3 -> 'Major Construction "
+                          "Yard') in its Build requirements panel. Needs --translations.")
+    ap.add_argument("--structure-name-overrides", nargs="*", default=[],
+                     help="Text file(s) of 'Internal_Name = Display name' lines. Wins over "
+                          "names found via --structures-dirs; use it for anything that "
+                          "still shows a raw ID.")
+    ap.add_argument("--galaxy-data-dirs", nargs="*", default=[],
+                     help="Data\\Xml folders (override order, last wins) holding CampaignFiles.xml, "
+                          "the Campaigns_Imperial_Web_Way_*.xml files, Planets_WW.xml and "
+                          "TradeRoutes*.xml. Adds a Galactic Map to every buildable card showing "
+                          "where it can be recruited, with a campaign selector on each page. "
+                          "Needs --translations for planet/campaign names.")
+    ap.add_argument("--story-scripts-dirs", nargs="*", default=[],
+                     help="Data\\Scripts\\Story folders (override order) holding the "
+                          "Unit_Filter_WW_*.lua scripts. Together with the story XML in "
+                          "--galaxy-data-dirs, used for each card's Era chip (Clone Wars / "
+                          "Galactic Civil War / Rise of the Empire / All).")
+    ap.add_argument("--upgrade-scripts-dirs", nargs="*", default=[],
+                     help="Data\\Scripts\\GameObject folders (override order) holding "
+                          "Upgrade_Units.lua. Adds a 'Forms & upgrades' panel to every unit or "
+                          "hero that upgrades (or is upgraded) into another form, with the "
+                          "upgrade's requirements and red upgrade-planet markers on the map.")
+    ap.add_argument("--easter-eggs-file", default=None,
+                     help="Text file, one unit Name per line (# comments allowed). Cards "
+                          "containing any of them get the Unit Type 'Easter Egg' instead of "
+                          "'Unique Hero'.")
+    ap.add_argument("--galaxy-planets-file", default="Planets_WW.xml",
+                     help="Planet definitions file name to look for in --galaxy-data-dirs.")
     args = ap.parse_args()
 
     # EXCLUDED_NAMES and SQUADRON_ICON_SUPPRESS_NAMES are mutable
@@ -454,6 +489,47 @@ def main():
         translations = parse_translations(args.translations, language=args.translation_language)
         print(f"Loaded {len(translations)} translation key(s) total.")
 
+    structure_names = {}
+    if args.structures_dirs:
+        structure_names = load_structure_names(args.structures_dirs, translations)
+        print(f"Loaded {len(structure_names)} structure name(s) from --structures-dirs.")
+    for path in args.structure_name_overrides:
+        try:
+            file_overrides = load_structure_name_overrides(path)
+        except OSError as e:
+            print(f"! could not load structure name overrides from {path}: {e}", file=sys.stderr)
+            sys.exit(1)
+        structure_names.update(file_overrides)
+        print(f"  loaded {len(file_overrides)} structure name override(s) from {path}")
+
+    galaxy = None
+    if args.galaxy_data_dirs:
+        galaxy = load_galaxy(args.galaxy_data_dirs, translations, args.galaxy_planets_file)
+        if galaxy:
+            print(f"Loaded Galactic Map data: {len(galaxy['setups'])} campaign set-up(s): "
+                  + ", ".join(f"{s['label']} ({len(s['planets'])} planets, {len(s['edges'])} routes)"
+                              for s in galaxy["setups"]))
+
+    eras = None
+    if args.galaxy_data_dirs:
+        eras = load_eras(args.galaxy_data_dirs, args.story_scripts_dirs)
+        print(f"Loaded era data for {len(eras)} unit(s) "
+              f"(everything else shows Era: All).")
+
+    upgrade_links = load_upgrade_links(args.upgrade_scripts_dirs) if args.upgrade_scripts_dirs else []
+    if args.upgrade_scripts_dirs:
+        print(f"Loaded {len(upgrade_links)} upgrade/repair link(s) from Upgrade_Units.lua.")
+
+    easter_eggs = set()
+    if args.easter_eggs_file:
+        try:
+            with open(args.easter_eggs_file, encoding="utf-8") as f:
+                easter_eggs = {l.strip() for l in f if l.strip() and not l.strip().startswith("#")}
+        except OSError as e:
+            print(f"! could not read --easter-eggs-file {args.easter_eggs_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+        print(f"  loaded {len(easter_eggs)} easter egg name(s) from {args.easter_eggs_file}")
+
     images_base = resolve_images_base(args.images_dir)
     if images_base != args.images_dir:
         print(f"Resolved --images-dir to: {images_base}")
@@ -507,6 +583,11 @@ def main():
         faction_logos=faction_logos,
         faction_logos_dir=faction_logos_base,
         custom_unit_order=custom_unit_order,
+        structure_names=structure_names,
+        galaxy=galaxy,
+        eras=eras,
+        easter_eggs=easter_eggs,
+        upgrade_links=upgrade_links,
     )
 
     output_dir = os.path.dirname(args.output) or "."

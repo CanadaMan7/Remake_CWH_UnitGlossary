@@ -34,6 +34,31 @@ from .grouping import (
 from .formation import (
     parse_squadron_offsets, render_formation_diagram, FORMATION_PLOT_SIZE_MULTIPLIER,
 )
+from .build_rules import collect_build_lines, render_build_panel, extract_build_info
+
+# Placeholders swapped per faction page by html_output.generate_html,
+# so each page's card shows that faction's build rules (see
+# build_rules.lines_for_faction). The card HTML itself is still only
+# rendered once.
+BUILD_PANEL_PLACEHOLDER = "<!--BUILD_PANEL-->"
+BUILD_ATTR_PLACEHOLDER = "__BUILD_ATTR__"
+# Galactic Map slot, also filled per faction page. Whatever sits
+# between the two markers (a squadron's formation diagram, or nothing)
+# is the fallback when the card gets no map (not buildable, or no
+# --galaxy-data-dirs).
+MAP_START = "<!--MAP_START-->"
+MAP_END = "<!--MAP_END-->"
+
+# Shown in place of a stat the XML doesn't set. Deliberately quiet (a
+# dash, with the explanation on hover) rather than a loud "Missing" --
+# on a garrison/spawned variant most build stats legitimately don't
+# exist, and a wall of red "Missing" labels made cards hard to read.
+MISSING_STAT_HTML = ("<span class='stat-value stat-value-missing' "
+                     "title='Not set in the XML for this unit'>&mdash;</span>")
+
+# Stats moved out of the general stat grid into the Build requirements
+# panel (see build_rules.render_build_panel) so they're not shown twice.
+STATS_SHOWN_IN_BUILD_PANEL = {"Tech_Level"}
 
 
 
@@ -217,7 +242,10 @@ def render_image_block(images_and_labels, fallback_text, lead_image_and_label=No
             f"<div class='img-slot'>"
             f"<img src='{escape(src)}' alt='{escape(alt_text)}' "
             f"onerror=\"this.replaceWith(Object.assign(document.createElement('div'),"
-            f"{{className:'img-fallback',textContent:'{escape(alt_text)}'}}))\">"
+            # this.alt rather than the name inlined as a JS string: an
+            # apostrophe in a name (e.g. "Dor'bulla-class") used to
+            # break the handler with a syntax error.
+            f"{{className:'img-fallback',textContent:this.alt}}))\">"
             f"{cap}</div>"
         )
 
@@ -238,7 +266,8 @@ def render_image_block(images_and_labels, fallback_text, lead_image_and_label=No
 
 def render_group_row(members, hardpoints_defs, translations=None, projectile_damage=None,
                       images_dir=None, image_ext="png", image_size=110, display_name_overrides=None,
-                      resolved_all=None, in_game_images_dir=None, in_game_images=None):
+                      resolved_all=None, in_game_images_dir=None, in_game_images=None,
+                      structure_names=None):
     """members: list of dicts {"name":..., "resolved":..., "icon_src":...}
     all belonging to the same variant group (see variant_group_key_for).
     Renders one row, laid out as an image, an identity block, and
@@ -283,7 +312,16 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
     or re-walk the members list itself."""
     translations = translations or {}
     projectile_damage = projectile_damage or {}
-    members_sorted = pick_primary_member(members)
+    # A buildable member is preferred as the card's representative
+    # (title line, main stats) over a garrison/Tech 99 copy merged into
+    # the same card. Stable sort, so pick_primary_member's order still
+    # decides among equals. NOTE: html_output keys --unit-order and the
+    # file-group section off pick_primary_member alone, not this, so
+    # existing unit-order files keep matching.
+    members_sorted = sorted(
+        pick_primary_member(members),
+        key=lambda m: not extract_build_info(m["resolved"])["buildable"],
+    )
     primary = members_sorted[0]
     resolved = primary["resolved"]
     tag = resolved.get("_tag", "")
@@ -474,6 +512,8 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
                 if v not in bucket:
                     bucket.append(v)
     for xml_tag, label in NUMERIC_STAT_TAGS:
+        if xml_tag in STATS_SHOWN_IN_BUILD_PANEL:
+            continue
         # The primary member's OWN directly-declared value (if it has
         # one) always wins outright over any aggregated multi-value --
         # a member's own _stat_multi_values only ever holds a tag it
@@ -497,7 +537,7 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
         else:
             stat_items.append(
                 f"<div class='stat-item'><span class='stat-label'>{escape(label)}</span>"
-                f"<span class='stat-value stat-value-missing'>Missing</span></div>"
+                f"{MISSING_STAT_HTML}</div>"
             )
         if xml_tag == "Build_Cost_Credits":
             try:
@@ -601,74 +641,24 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
                 f"</div>"
             )
 
-    # Required_Planets can differ per group member (e.g. only some
-    # affiliations of a merged unit need specific planets) -- show every
-    # distinct value found across the group, captioned with which
-    # affiliation(s) it applies to, rather than only the primary
-    # member's value. Values are cleaned (_WW stripped, tokens deduped)
-    # BEFORE being used as the grouping key, so e.g. "Kuat, Kuat_WW" from
-    # one member and "Kuat" from another correctly collapse together.
-    # As above, a member with no affiliation of its own falls back to
-    # the group's overall affiliations rather than its raw name. Shown
-    # as its own full-width line under the stats columns rather than a
-    # stat-item, since a planet list can run long.
-    planets_to_labels = {}
-    planets_order = []
-    for m in members_sorted:
-        rp_raw = first_text(m["resolved"], "Required_Planets", "")
-        if not rp_raw:
-            continue
-        rp_clean = ", ".join(clean_required_planets(rp_raw))
-        affs = get_affiliations(m["resolved"], m["name"]) or affiliations or [m["name"]]
-        if rp_clean not in planets_to_labels:
-            planets_to_labels[rp_clean] = []
-            planets_order.append(rp_clean)
-        planets_to_labels[rp_clean].extend(affs)
-    planets_lines = []
-    for rp_clean in planets_order:
-        labels = ", ".join(dedupe_preserve_order(planets_to_labels[rp_clean]))
-        label_suffix = f" ({escape(labels)})" if len(members_sorted) > 1 else ""
-        planets_lines.append(
-            f"<div><span class='stat-label'>Required Planets{label_suffix}</span>: {escape(rp_clean)}</div>"
-        )
-    planets_html = f"<div class='row-planets'>{''.join(planets_lines)}</div>" if planets_lines else ""
-
-    # Required_Special_Structures (e.g. a shipyard tier this unit needs
-    # built first) can differ per group member the same way
-    # Required_Planets can -- e.g. only one merged variant needs its
-    # own faction's shipyard -- so it's aggregated the same way here:
-    # every distinct value found across the group, captioned with which
-    # affiliation(s) it applies to, rather than only the primary
-    # member's value (previously read once off `resolved` via a plain
-    # stat-item, which silently dropped every other merged variant's
-    # own requirement). Not squadron-specific -- any unit type can
-    # declare it, so this runs for both branches below same as
-    # planets_html. Shown as its own full-width line rather than a
-    # stat-item for the same reason as Required_Planets: a stat-item
-    # assumes one shared value for the whole card, which no longer
-    # holds once a value can vary per member.
-    structures_to_labels = {}
-    structures_order = []
-    for m in members_sorted:
-        ss_raw = first_text(m["resolved"], "Required_Special_Structures", "")
-        if not ss_raw:
-            continue
-        ss_clean = ", ".join(s.strip() for s in ss_raw.split(",") if s.strip())
-        if not ss_clean:
-            continue
-        affs = get_affiliations(m["resolved"], m["name"]) or affiliations or [m["name"]]
-        if ss_clean not in structures_to_labels:
-            structures_to_labels[ss_clean] = []
-            structures_order.append(ss_clean)
-        structures_to_labels[ss_clean].extend(affs)
-    structures_lines = []
-    for ss_clean in structures_order:
-        labels = ", ".join(dedupe_preserve_order(structures_to_labels[ss_clean]))
-        label_suffix = f" ({escape(labels)})" if len(members_sorted) > 1 else ""
-        structures_lines.append(
-            f"<div><span class='stat-label'>Special Structures{label_suffix}</span>: {escape(ss_clean)}</div>"
-        )
-    structures_html = f"<div class='row-structures'>{''.join(structures_lines)}</div>" if structures_lines else ""
+    # Build limits and every build restriction (station level, special
+    # structures, planets, orbiting units, locked-at-start) in one
+    # panel shown right under the card's title -- see build_rules.py.
+    # Replaces the old separate Required Planets / Special Structures
+    # lines at the bottom of the card. Aggregated across every merged
+    # member, captioned per affiliation when the members differ.
+    orbit_names = {}
+    if resolved_all is not None:
+        for m in members_sorted:
+            for raw in xml_io.all_texts(m["resolved"], "Required_Orbiting_Units"):
+                for u in raw.replace(",", " ").split():
+                    if u in resolved_all and u not in orbit_names:
+                        orbit_names[u] = resolve_display_name(
+                            resolved_all[u], u, translations, display_name_overrides)
+    build_lines = collect_build_lines(members_sorted, affiliations)
+    _default_build_html, build_summary, _default_tokens = render_build_panel(
+        build_lines, structure_names=structure_names, unit_names=orbit_names)
+    build_html = BUILD_PANEL_PLACEHOLDER
 
     member_grid_html = ""
     if squadron_members:
@@ -707,7 +697,7 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
                 else:
                     member_stat_items.append(
                         f"<div class='stat-item'><span class='stat-label'>{escape(label)}</span>"
-                        f"<span class='stat-value stat-value-missing'>Missing</span></div>"
+                        f"{MISSING_STAT_HTML}</div>"
                     )
             member_hp_names = hardpoint_names(member_resolved)
             hp_inner = render_hardpoint_block(member_hp_names, hardpoints_defs, projectile_damage)
@@ -910,7 +900,7 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
     # from the source Encyclopedia_Text.
     description_html = "".join(f"<p class='row-description'>{escape(p)}</p>" for p in description)
 
-    has_planets = bool(planets_lines)
+    has_planets = build_summary["planets"]
     is_hero = is_hero_unit(resolved)
     # data-affiliations / data-classes / data-has-planets / data-unit-kind
     # drive the top-of-page filter bar (see generate_html / PAGE_TEMPLATE
@@ -921,9 +911,13 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
     class_attr = " ".join(sorted({c.lower() for c in classes}))
     planets_attr = "yes" if has_planets else "no"
     unit_kind_attr = "hero" if is_hero else "regular"
+    # data-build tokens drive the "Build rules" filter; filled in per
+    # faction page together with the panel (see BUILD_ATTR_PLACEHOLDER).
+    build_attr = BUILD_ATTR_PLACEHOLDER
+    row_id = "unit-" + re.sub(r"[^A-Za-z0-9_-]+", "-", raw_name)
 
     html = f"""
-<div class="row row--squadron" data-name="{escape(search_terms)}" data-affiliations="{escape(aff_attr)}" data-classes="{escape(class_attr)}" data-has-planets="{planets_attr}" data-unit-kind="{unit_kind_attr}">
+<div class="row row--squadron" data-name="{escape(search_terms)}" data-affiliations="{escape(aff_attr)}" data-classes="{escape(class_attr)}" data-has-planets="{planets_attr}" data-unit-kind="{unit_kind_attr}" data-build="{escape(build_attr)}" id="{escape(row_id)}">
   <div class="row-image">{img_html}{garrison_images_html}{in_game_images_html}</div>
   <div class="row-squadron-body">
     <div class="row-grid-middle">
@@ -932,19 +926,18 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
         <div class="meta">{escape(raw_name)} &middot; {escape(tag)}</div>
         {member_names_note}
       </div>
+      {build_html}
       {stats_html}
       {garrison_html}
     </div>
-    <div class="row-grid-formation">{formation_box_html}</div>
+    <div class="row-grid-formation">{MAP_START}{formation_box_html}{MAP_END}</div>
     <div class="row-grid-lower">
       {description_html}
-      {planets_html}
-      {structures_html}
       {member_grid_html}
     </div>
   </div>
 </div>""" if squadron_members else f"""
-<div class="row" data-name="{escape(search_terms)}" data-affiliations="{escape(aff_attr)}" data-classes="{escape(class_attr)}" data-has-planets="{planets_attr}" data-unit-kind="{unit_kind_attr}">
+<div class="row" data-name="{escape(search_terms)}" data-affiliations="{escape(aff_attr)}" data-classes="{escape(class_attr)}" data-has-planets="{planets_attr}" data-unit-kind="{unit_kind_attr}" data-build="{escape(build_attr)}" id="{escape(row_id)}">
   <div class="row-image">{img_html}{garrison_images_html}{in_game_images_html}</div>
   <div class="row-body">
     <div class="row-header">
@@ -952,15 +945,15 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
       <div class="meta">{escape(raw_name)} &middot; {escape(tag)}</div>
       {member_names_note}
     </div>
+    {build_html}
     <div class="row-content">
       {stats_html}
       {hardpoints_html}
       {garrison_html}
     </div>
     {description_html}
-    {planets_html}
-    {structures_html}
   </div>
+  <div class="row-map-col">{MAP_START}{MAP_END}</div>
 </div>"""
 
     return {
@@ -973,4 +966,9 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
         "sort_name": display_label.lower(),
         "is_hero": is_hero,
         "raw_name": raw_name,
+        "row_id": row_id,
+        "display_label": display_label,
+        "build": build_summary,
+        "build_lines": build_lines,
+        "orbit_names": orbit_names,
     }
