@@ -203,6 +203,14 @@ def tech_sort_value(lines):
     return min(techs) if techs else 999
 
 
+def _sort_attr(value):
+    """A Sort By number as an HTML attribute value; "" when missing
+    (page_script puts those cards last)."""
+    if value is None:
+        return ""
+    return str(int(value)) if float(value).is_integer() else str(value)
+
+
 def render_limits_summary(limited_rows):
     """A collapsible at-a-glance table of every build-limited unit on
     the page, each name linking down to its card. "" if none."""
@@ -376,18 +384,11 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
         # here doesn't change anything for those.
         merged = merge_squadron_members(merged, resolved_all)
 
-        # Attach a bare Required_Planets modifier's value if one shares
-        # this candidate's own immediate Variant_Of_Existing_Type parent
-        # and this candidate doesn't already declare/inherit its own
-        # Required_Planets. See compute_orphan_planet_modifiers.
-        if "Required_Planets" not in merged:
-            own_parent_elem = registry[name]["elem"].find("Variant_Of_Existing_Type")
-            own_parent_name = (own_parent_elem.text or "").strip() if own_parent_elem is not None else ""
-            modifier_els = []
-            for _mod_name, mod_resolved in orphan_planet_modifiers.get(own_parent_name, []):
-                modifier_els.extend(mod_resolved.get("Required_Planets", []))
-            if modifier_els:
-                merged["Required_Planets"] = modifier_els
+        # Required_Planets comes ONLY from this unit's own
+        # Variant_Of_Existing_Type chain (already in `resolved`). A bare
+        # *_Required_Planets node that merely shares this unit's parent
+        # is a sibling, not an ancestor, so the game never applies it
+        # here -- see compute_orphan_planet_modifiers.
 
         if hide_untranslated and translations and not has_translated_name(merged, translations):
             skipped["untranslated"] += 1
@@ -477,6 +478,9 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
             "display_label": row_result["display_label"],
             "build_lines": row_result["build_lines"],
             "orbit_names": row_result["orbit_names"],
+            "sort_cost": row_result["sort_cost"],
+            "sort_pop": row_result["sort_pop"],
+            "sort_ai_power": row_result["sort_ai_power"],
         })
 
     all_sources = {row["source"] for row in all_rows}
@@ -585,6 +589,8 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
             "html": r["html"], "row_id": r["row_id"], "display_label": r["display_label"],
             "build_lines": r["build_lines"], "orbit_names": r["orbit_names"],
             "classes": r["classes"], "is_hero": r["is_hero"],
+            "sort_cost": r["sort_cost"], "sort_pop": r["sort_pop"],
+            "sort_ai_power": r["sort_ai_power"],
         })
         return row
 
@@ -656,7 +662,10 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
                 ' data-build="',
                 f' data-era="{row["era_tokens"]}" data-sort-name="{escape(base_row["display_label"].lower())}"'
                 f' data-class-rank="{class_sort_rank(base_row["classes"])}"'
-                f' data-tech="{tech_sort_value(lines)}" data-build="', 1)
+                f' data-tech="{tech_sort_value(lines)}"'
+                f' data-cost="{_sort_attr(base_row.get("sort_cost"))}"'
+                f' data-pop="{_sort_attr(base_row.get("sort_pop"))}"'
+                f' data-ai-power="{_sort_attr(base_row.get("sort_ai_power"))}" data-build="', 1)
             row["html"] = row_html
             row["build"] = build_summary
             row["build_tokens"] = build_tokens

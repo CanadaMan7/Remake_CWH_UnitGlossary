@@ -16,11 +16,9 @@ TIE_Interceptor_181st_Soontir, Soontir Fel TIE/IN
 181st_Bomber_Squadron, 181st Gamma TIE/SA Squadrons
 Black_Squadron_Actis, Black Squadron (Eta-2 Actis)
 Vader_Eta2_Actis, Darth Vader Eta-2 Actis
-Vader_Venator, Darth Vader - Venator Predator
 Black_Squadron, Black Squadron (TIE/LN)
 TIE_Advanced, Vader's TIE Advanced x1
 Black_TIE_Fighter, Black Squadron TIE/LN
-Dedra_Meero_MTC, Dedra Meero – Vigilance (YE-4 Gunship)
 Integrity, Lieutenant Lorth Needa - Integrity (Carrack-class)
 Integrity_CW_Rep, Lieutenant Lorth Needa - Integrity (Carrack-class)
 HMP_Gunship_Squadron_CIS, HMP Gunship Squadron
@@ -38,8 +36,5 @@ Defender_Leader_K, Defender Wing Leader
 Defender_K, Defender Wing K-Wing
 Rogue_1, Rogue 1 X-Wing
 Rogue_2, Rogue Squadron X-Wing
-Tyber_Zann_Interceptor-IV, Tyber Zann - Twi'lek Dancer
-Tyber_Zann_The_Merciless, Tyber Zann - The Merciless
-Imperial_YE4_Gunship_Squadron, YE-4 Gunship Squadron
 Munificent_Frigate_CIS_Captain, Munificent-class CIS Captain
 Kenobi_Short_Negotiations, Obi-Wan Kenobi - Short Negotiations

@@ -21,7 +21,7 @@ Every unit card now opens with a **Build requirements** panel, read straight fro
   Named hero squadrons (`Is_Named_Hero` = Yes on the squadron or one of its craft) are not divided, because a single unit caps them.
 - **Tech level**, **Space station level** (`Required_Star_Base_Level`) and **Ground base level** (`Required_Ground_Base_Level`).
 - **Requires**: `Required_Special_Structures`, shown by in-game name (e.g. `U_Shipyard_3` → "Major Construction Yard"). Hover a name to see its internal ID.
-- **Only at**: `Required_Planets`.
+- **Only at**: `Required_Planets`, taken from the unit itself or an entry it inherits from through `Variant_Of_Existing_Type`. A `*_Required_Planets` entry that only shares a parent with the unit (for example `Pelta_Required_Planets` next to `Pelta_Rep`, both under `Pelta_Template`) does not restrict it, because the game never applies it to that unit.
 - **Needs in orbit**: `Required_Orbiting_Units`.
 - **Locked at start**: `Build_Initially_Locked` (and whether a slicer can unlock it).
 - **Era**: Clone Wars, Galactic Civil War, Rise of the Empire, or All. It comes from the live campaigns' story files: each campaign's `Story_Name` points to a `Story_Plots_*` file, which loads `Story_SandBox_*` files and `Unit_Filter_WW_*` Lua scripts (from `--story-scripts-dirs`).
@@ -36,7 +36,7 @@ A unit with no build cost, or with Tech_Level 99, shows as "Not buildable". Thes
 
 **Easter eggs**: units listed in `easter_eggs.txt` (currently `Jak_Kannadee_CR-109`) get their own **Easter Egg** Unit Type filter instead of Unique Hero. They stay hidden, even from search, the build-limited table and entry counts, until that filter is ticked.
 
-**Era filter and Sort by**: each faction page has an **Era** filter (Clone Wars, Galactic Civil War, Rise of the Empire, All eras) and a **Sort by** menu next to the search box. *Default* keeps the cards grouped by source file. *Alphabetical*, *Unit Class* and *Tech level* show one flat list instead. Tech level sorts lowest first; ties go by class, then name, and cards that can't be built come last. Unit Class order is Fighter, Bomber, Gunship, Corvette, Frigate, Capital, then anything else, alphabetical within each class.
+**Era filter and Sort by**: each faction page has an **Era** filter (Clone Wars, Galactic Civil War, Rise of the Empire, All eras) and a **Sort by** menu next to the search box. *Default* keeps the cards grouped by source file. *Alphabetical*, *Unit Class*, *Tech level*, *Cost*, *Pop Cost* and *AI Combat Power* show one flat list instead. Tech level sorts lowest first; ties go by class, then name, and cards that can't be built come last. Cost (`Build_Cost_Credits`) and Pop Cost (`Population_Value`) sort lowest first; AI Combat Power (`AI_Combat_Power`) sorts highest first. These use the number shown on the card (the largest one when a mixed squadron shows several); cards with no value come last, and ties go by class, then name. Unit Class order is Fighter, Bomber, Gunship, Corvette, Frigate, Capital, then anything else, alphabetical within each class.
 
 Each faction page also has:
 - a **Build-limited units** table at the top, linking to each card

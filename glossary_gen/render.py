@@ -62,6 +62,24 @@ STATS_SHOWN_IN_BUILD_PANEL = {"Tech_Level"}
 
 
 
+
+# Stats exposed as Sort By keys (see html_output / page_script).
+SORT_NUMBER_TAGS = ("Build_Cost_Credits", "Population_Value", "AI_Combat_Power")
+
+
+def largest_number(text):
+    """Largest number in a stat value such as "120" or "8, 12" (a mixed
+    squadron); None if there is none."""
+    best = None
+    for token in (text or "").split(","):
+        try:
+            n = float(token.strip())
+        except ValueError:
+            continue
+        if best is None or n > best:
+            best = n
+    return best
+
 def render_hardpoint_details(hp_names, hardpoints_defs, projectile_damage):
     """Builds the collapsed-by-default <details> list of individual
     hardpoint cards (range, fire rate, damage/shot, raw DPS, and
@@ -497,6 +515,10 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
     stat_items = []
     build_cost = None
     hp = None
+    # Sort By keys (Cost / Pop Cost / AI Combat Power): the number shown
+    # on the card, or the largest one when a mixed squadron shows
+    # several. None when the card shows "Missing".
+    sort_numbers = {}
     # Aggregated across every member of the merged group, not just the
     # primary -- the same reason squadron_members/fighter_affiliations
     # are unioned above rather than read off `resolved` alone: a
@@ -539,6 +561,8 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
                 f"<div class='stat-item'><span class='stat-label'>{escape(label)}</span>"
                 f"{MISSING_STAT_HTML}</div>"
             )
+        if xml_tag in SORT_NUMBER_TAGS:
+            sort_numbers[xml_tag] = largest_number(val)
         if xml_tag == "Build_Cost_Credits":
             try:
                 build_cost = float(val) if val else None
@@ -962,6 +986,9 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
         "classes": classes,
         "has_planets": has_planets,
         "build_cost": build_cost,
+        "sort_cost": sort_numbers.get("Build_Cost_Credits"),
+        "sort_pop": sort_numbers.get("Population_Value"),
+        "sort_ai_power": sort_numbers.get("AI_Combat_Power"),
         "hp": hp,
         "sort_name": display_label.lower(),
         "is_hero": is_hero,

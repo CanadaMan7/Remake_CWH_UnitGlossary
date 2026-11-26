@@ -93,25 +93,20 @@ def compute_orphan_planet_modifiers(registry, resolved_all, referenced_parents):
     Variant_Of_Existing_Type (so they're NOT already handled by
     compute_passthrough_names / normal inheritance).
 
-    A mod author will sometimes factor a Required_Planets value out
-    into its own node instead of repeating it on every real leaf unit
-    that shares the same immediate parent (e.g. Pelta_Required_Planets,
-    parented directly off Pelta_Template, sitting alongside
-    Pelta_Rep -- also parented directly off Pelta_Template -- rather
-    than being layered ABOVE Pelta_Rep in the inheritance chain the way
-    Star_Destroyer_Torpedo_Required_Planets is). Nothing inherits from
-    a node like that, it declares no Affiliation, no garrison, and no
-    stat overrides -- so on its own it would render as an empty,
-    unaffiliated orphan card with nothing but a planet list. It isn't a
-    real, distinct ship; it's a constraint meant to apply to its real
-    affiliated sibling(s).
+    Example: Pelta_Required_Planets and Pelta_Rep are both parented
+    directly off Pelta_Template. Nothing inherits from
+    Pelta_Required_Planets, so in game it restricts nothing -- Pelta_Rep
+    only points at Pelta_Template and is buildable anywhere. (Compare
+    Pelta_Refit_Republic, whose chain really does go through
+    Pelta_Refit_Required_Planets and so really is restricted.) Such a
+    node has no Affiliation, garrison or stats, so on its own it would
+    render as an empty orphan card; the generator just hides it.
 
-    Returns {parent_name: [(bare_node_name, resolved_dict), ...]} so
-    callers can look up, for any candidate unit, whether some bare
-    modifier shares that candidate's own immediate
-    Variant_Of_Existing_Type parent and should have its
-    Required_Planets attached to that candidate (only when the
-    candidate doesn't already declare its own -- see generate_html)."""
+    Its planets are deliberately NOT copied onto siblings: the game
+    applies Required_Planets only through real inheritance.
+
+    Returns {parent_name: [(bare_node_name, resolved_dict), ...]};
+    generate_html only uses the node names, to skip them as cards."""
     by_parent = {}
     for name, entry in registry.items():
         if name in referenced_parents:

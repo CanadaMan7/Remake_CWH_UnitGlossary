@@ -91,7 +91,23 @@ function applySort() {
     // Tech level: lowest first; unbuildable cards (999) last; ties by
     // class order, then name.
     const byTech = (a, b) => (Number(a.dataset.tech) - Number(b.dataset.tech)) || byClass(a, b);
-    const cmp = mode === 'class' ? byClass : mode === 'tech' ? byTech : byName;
+    // Cost / Pop Cost: lowest first. AI Combat Power: highest first.
+    // Cards with no value go last; ties by class order, then name.
+    const byNumber = (key, dir) => (a, b) => {
+      const va = a.dataset[key], vb = b.dataset[key];
+      if (va === '' && vb === '') return byClass(a, b);
+      if (va === '') return 1;
+      if (vb === '') return -1;
+      return ((Number(va) - Number(vb)) * dir) || byClass(a, b);
+    };
+    const comparers = {
+      class: byClass,
+      tech: byTech,
+      cost: byNumber('cost', 1),
+      pop: byNumber('pop', 1),
+      ai: byNumber('aiPower', -1),
+    };
+    const cmp = comparers[mode] || byName;
     const list = sortedWrap.querySelector('.rows');
     allRows.slice().sort(cmp).forEach(r => list.appendChild(r));
     fileGroups.forEach(g => g.classList.add('sorted-away'));

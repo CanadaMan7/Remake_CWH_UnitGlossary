@@ -52,10 +52,10 @@ MERGING BEHAVIOR
       of its own besides a Required_Planets tag, and that nothing else
       inherits from via Variant_Of_Existing_Type (so it ISN'T caught by
       the passthrough rule above) -- is not shown as its own card
-      either. Instead its Required_Planets value is attached to whatever
-      other real (Affiliation-bearing) unit(s) share its immediate
-      Variant_Of_Existing_Type parent and don't already declare their
-      own Required_Planets. See compute_orphan_planet_modifiers.
+      either. Its Required_Planets value is NOT copied onto sibling
+      units that merely share its parent: the game only applies
+      Required_Planets through real Variant_Of_Existing_Type
+      inheritance. See compute_orphan_planet_modifiers.
     - Entries that share an identical Encyclopedia_Text description AND
       also share a matching "same ship" signature (stats + garrison
       composition -- see variant_group_key_for) are grouped into a

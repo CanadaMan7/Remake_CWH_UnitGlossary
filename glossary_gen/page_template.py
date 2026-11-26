@@ -36,6 +36,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
       <option value="alpha">Alphabetical</option>
       <option value="class">Unit Class</option>
       <option value="tech">Tech level</option>
+      <option value="cost">Cost</option>
+      <option value="pop">Pop Cost</option>
+      <option value="ai">AI Combat Power</option>
     </select>
   </label>
 </div>
