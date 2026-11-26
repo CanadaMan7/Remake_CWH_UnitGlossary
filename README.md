@@ -12,6 +12,8 @@ Briefly, the procedure is:
 The in-game tga icons need to be converted to png to be rendered correctly in html. First, use MTD Editor (https://modtools.petrolution.net/tools/MtdEditor) to mass extract tga icons into a .tga folder. Then, run the Python script convert_icons.py to convert them to a folder of pngs. (In the following step, only pngs rendered on the web pages are kept, and the remaining are moved to an "unused" folder and can be discarded.)
 Generate all web pages by running run_glossary.bat, but first, open the file and take a look at the parameter specifications. It simply runs a Python script, but it takes as input a half dozen or so .txt files. These files optionally specify all sorts of manual refinements to the xml entries to improve presentation of the web pages. In practice, I end up running the .bat multiple times, each time inspecting a few entries for errors, and return to these parameter files for modifications as needed."
 
+AI Usage Disclaimer: This was largely built and upgraded via Claude. AI is not used to code the larger Clone Wars Holdouts mod.
+
 ## Build requirements panel
 
 Every unit card now opens with a **Build requirements** panel, read straight from the unit XML:
