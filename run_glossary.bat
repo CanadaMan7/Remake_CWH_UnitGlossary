@@ -30,6 +30,7 @@ python generate_glossary.py ^
 	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Scripts\Story" ^
 	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Scripts\Story" ^
 	--easter-eggs-file easter_eggs.txt ^
+	--roster-overrides roster_overrides.txt ^
 	--upgrade-scripts-dirs ^
 	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\1770851727\Data\Scripts\GameObject" ^
 	"C:\Program Files (x86)\Steam\steamapps\workshop\content\32470\2794270450\Data\Scripts\GameObject" ^

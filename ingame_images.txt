@@ -56,3 +56,47 @@ Vulture_Droid_Squadron, vulture.png
 Warlord_Corvette_Group, WarlordPatrolCraft.png
 XX_777_Droid_Frigate_E, xx777.png, xx777-2.png
 Z-95_CVMR_Squadron, rep-z95.png
+# --- From ModDB: screenshots whose ModDB title exactly matches the unit's in-game name.
+# --- Linked straight from media.moddb.com. Galleries:
+# ---   https://www.moddb.com/mods/empire-at-war-re/images
+# ---   https://www.moddb.com/mods/empire-at-war-remake-clone-wars-holdout-factions/images
+# Insolvence-class (Ingame)
+TechnoUnion_Ordnance_Cruiser_CIS, https://media.moddb.com/images/mods/1/57/56959/InsolvenceGoingDown.jpg, https://media.moddb.com/images/mods/1/57/56959/InsolvenceEvilEye.jpg, https://media.moddb.com/images/mods/1/57/56959/InsolvenceBarrage.jpg, https://media.moddb.com/images/mods/1/57/56959/InsolvenceResting1.jpg
+# Hardcell-class Gunboat
+Hardcell_Battle_Refit_CIS, https://media.moddb.com/images/mods/1/57/56959/20230904114619_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20230902142807_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20230901121629_1.jpg
+Hardcell_Battle_Refit_Garrison, https://media.moddb.com/images/mods/1/57/56959/20230904114619_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20230902142807_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20230901121629_1.jpg
+# Cad Bane - Xanadu Blood
+Xanadu_Blood_CU, https://media.moddb.com/images/mods/1/57/56959/ModdbCadBane.jpg
+Xanadu_Blood_CW, https://media.moddb.com/images/mods/1/57/56959/ModdbCadBane.jpg
+# Rogue-class Starfighter
+Rogue_Class_Garrison, https://media.moddb.com/images/mods/1/57/56959/Porax.jpg
+Rogue_Class_Squadron_CIS, https://media.moddb.com/images/mods/1/57/56959/Porax.jpg
+# Modular Taskforce Cruiser
+MTC_Repair, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Repair_CIS, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Repair_R, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Repair_Republic, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Repair_U, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Repair_Warlords, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Spy, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Spy_R, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Spy_Republic, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Spy_U, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+MTC_Spy_Warlords, https://media.moddb.com/images/mods/1/24/23033/20211126200312_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126200627_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126213658_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20211126225037_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Untitled-1.39.jpg
+# Arc Hammer
+Arc_Hammer, https://media.moddb.com/images/mods/1/24/23033/20190428094920_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20190428094929_1.jpg, https://media.moddb.com/images/mods/1/24/23033/20190428095010_1.jpg, https://media.moddb.com/images/mods/1/24/23033/Star_Wars_Empire_At_War_Collection_Screenshot_2019.04.28_-_14.30.58.70.png
+# --- Close-name matches approved by hand (ModDB title is close to, not identical to, the in-game name).
+# Diamond-class Cruiser
+Diamond_U, https://media.moddb.com/images/mods/1/57/56959/CloseUp.jpg, https://media.moddb.com/images/mods/1/57/56959/LavaShadow.jpg, https://media.moddb.com/images/mods/1/57/56959/GroupBeautyShot.jpg
+Diamond_CIS, https://media.moddb.com/images/mods/1/57/56959/CloseUp.jpg, https://media.moddb.com/images/mods/1/57/56959/LavaShadow.jpg, https://media.moddb.com/images/mods/1/57/56959/GroupBeautyShot.jpg
+Diamond_E, https://media.moddb.com/images/mods/1/57/56959/CloseUp.jpg, https://media.moddb.com/images/mods/1/57/56959/LavaShadow.jpg, https://media.moddb.com/images/mods/1/57/56959/GroupBeautyShot.jpg
+Diamond_R, https://media.moddb.com/images/mods/1/57/56959/CloseUp.jpg, https://media.moddb.com/images/mods/1/57/56959/LavaShadow.jpg, https://media.moddb.com/images/mods/1/57/56959/GroupBeautyShot.jpg
+# Hornet-class Carrier
+Hornet_Carrier, https://media.moddb.com/images/mods/1/57/56959/HornetBehind.jpg, https://media.moddb.com/images/mods/1/57/56959/Hornet3.jpg, https://media.moddb.com/images/mods/1/57/56959/HornetIsometric.jpg
+Hornet_Carrier_CIS, https://media.moddb.com/images/mods/1/57/56959/HornetBehind.jpg, https://media.moddb.com/images/mods/1/57/56959/Hornet3.jpg, https://media.moddb.com/images/mods/1/57/56959/HornetIsometric.jpg
+# Valiant-class Star Destroyer
+Valiant_Rep, https://media.moddb.com/images/mods/1/57/56959/20230930152618_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20231019132434_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20230928064502_1.jpg
+# Republic J-45 Sabre
+J45_Sabre_Squadron_Rep, https://media.moddb.com/images/mods/1/57/56959/20240418100450_1.jpg, https://media.moddb.com/images/mods/1/57/56959/20240421134147_1.jpg, https://media.moddb.com/images/mods/1/57/56959/Main.jpg
+# Urai Fenn - Peacebringer
+Urai_Javelin, https://media.moddb.com/images/mods/1/24/23033/20220108165529_1.jpg

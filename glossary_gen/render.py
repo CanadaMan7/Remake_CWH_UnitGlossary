@@ -900,9 +900,16 @@ def render_group_row(members, hardpoints_defs, translations=None, projectile_dam
                     seen_in_game_filenames.add(fname)
                     in_game_filenames.append(fname)
         if in_game_filenames and in_game_images_dir:
+            # An entry that is a full http(s) URL (for example a ModDB
+            # image) is used as-is; anything else is a file name under
+            # --in-game-images-dir.
+            def _shot_src(fname):
+                if fname.lower().startswith(("http://", "https://")):
+                    return escape(fname)
+                return f"{escape(in_game_images_dir)}/{escape(fname)}"
             thumbs = "".join(
-                f"<div class='in-game-thumb' onclick=\"openImageModal('{escape(in_game_images_dir)}/{escape(fname)}')\">"
-                f"<img src='{escape(in_game_images_dir)}/{escape(fname)}' alt='In-game screenshot' loading='lazy'></div>"
+                f"<div class='in-game-thumb' onclick=\"openImageModal('{_shot_src(fname)}')\">"
+                f"<img src='{_shot_src(fname)}' alt='In-game screenshot' loading='lazy'></div>"
                 for fname in in_game_filenames
             )
             in_game_images_html = (

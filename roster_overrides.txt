@@ -1,0 +1,13 @@
+# roster_overrides.txt
+#
+# Force a unit's Roster Type (Core or Cross-buildable) on one faction's page,
+# when the automatic rules get it wrong.
+#
+# FORMAT: one entry per line --
+#
+#   <faction>, <exact unit Name>, core|cross
+#
+# <faction> is the affiliation as written in the XML (Empire, Rebel, Underworld,
+# Republic, CIS, Neutral, Hutt_Cartels, ...). Lines starting with # are comments.
+
+CIS, Hornet_Carrier_CIS, cross

@@ -19,11 +19,12 @@ links, and the final PAGE_TEMPLATE/SPLASH_TEMPLATE.format() assembly.
 
 import os
 import re
+import sys
 from html import escape
 
 from . import xml_io
 from .xml_io import first_text, resolve_unit
-from .model import has_translated_name, CLASS_FILTER_EXCLUDE
+from .model import has_translated_name, CLASS_FILTER_EXCLUDE, spawned_units
 from .grouping import (
     compute_membership, compute_passthrough_names, compute_referenced_parents,
     compute_orphan_planet_modifiers, compute_garrison_spawners,
@@ -181,6 +182,126 @@ ERA_FILTER_OPTIONS = [
     ("rote", "Rise of the Empire"), ("all", "All eras"),
 ]
 
+# Roster Type filter. A card is in a faction's Core roster when the
+# faction's name appears in the file name of that faction's variant(s),
+# or when that faction can build at least one of its variants without a
+# planet restriction; otherwise it's Cross-buildable. These are the
+# words looked for in the file name (split on "_", case-insensitive)
+# for each faction page.
+ROSTER_FILE_TOKENS = {
+    "empire": {"empire"}, "rebel": {"rebel"}, "underworld": {"underworld"},
+    "republic": {"republic"}, "cis": {"cis"}, "cartels": {"hutt", "cartel", "cartels"},
+    "csa": {"csa"}, "hapan": {"hapan", "hapes"}, "mandalorians": {"mandalorian", "mandalorians"},
+    "pirates": {"pirate", "pirates"}, "sith": {"sith"}, "warlords": {"warlords"},
+    "neutral": {"neutral"},
+}
+ROSTER_FILTER_OPTIONS = [("core", "Core"), ("cross", "Cross-buildable")]
+
+
+def _file_name_tokens(path):
+    """Lower-case words of a unit file's name. "Old_Republic" in a file
+    name means the Sith (Sith Cultist) faction, so such a file counts as
+    a Sith file and never as a Republic one -- including the
+    Old_Republic_Republic_... ships (Aurek, Foray, Hammerhead,
+    Centurion)."""
+    stem = os.path.splitext(os.path.basename(path or ""))[0].lower()
+    if "old_republic" in stem:
+        words = {t for t in stem.replace("old_republic", "").split("_") if t}
+        return (words - {"republic"}) | {"sith"}
+    return {t for t in stem.split("_") if t}
+
+
+def _in_faction_file(faction_key, members, card_names):
+    """True if the file of one of this faction's variants on the card
+    has the faction's name in it (see ROSTER_FILE_TOKENS)."""
+    tokens = ROSTER_FILE_TOKENS.get(faction_key, {faction_key})
+    wanted = set(card_names)
+    return any(m["name"] in wanted and tokens & _file_name_tokens(m["resolved"].get("_source"))
+               for m in members)
+
+
+def is_garrison_name(name):
+    """A garrison copy: "_G" or "Garrison" in the Name (e.g. Z-95_MP_G,
+    J45_Sabre_Garrison)."""
+    words = name.lower().split("_")
+    return "g" in words or any("garrison" in w for w in words)
+
+
+def roster_type(faction_key, lines, members, card_names):
+    """First-pass 'core' or 'cross' for one card on one faction page;
+    "" on the Unaffiliated page. Core if a file name has the faction's
+    name in it, or if one of the faction's variants has no planet
+    restriction. Garrison cards get a second pass (apply_garrison_roster)
+    and roster_overrides.txt has the final say (apply_roster_overrides)."""
+    if not faction_key:
+        return ""
+    if _in_faction_file(faction_key, members, card_names):
+        return "core"
+    if any(not l["info"]["planets"] for l in lines):
+        return "core"
+    return "cross"
+
+
+def apply_garrison_roster(faction_key, rows):
+    """Second pass over one faction page. A Core garrison card (every one
+    of its variant Names is a garrison Name) drops to Cross-buildable
+    when its file doesn't have the faction's name in it AND it isn't in
+    the Garrison Complement of a Core non-garrison card on the same
+    page. Garrison cards that were already Cross-buildable stay so."""
+    if not faction_key:
+        return
+    core_garrisons = set()
+    for row in rows:
+        if row["roster"] == "core" and not row["_is_garrison"]:
+            for m in row["members"]:
+                for items in spawned_units(m["resolved"]).values():
+                    core_garrisons.update(name.lower() for _kind, name, _count in items)
+    for row in rows:
+        if not row["_is_garrison"] or row["roster"] != "core":
+            continue
+        _lines, members, card_names = row["_roster_ctx"]
+        if not _in_faction_file(faction_key, members, card_names) and \
+                not any(n.lower() in core_garrisons for n in card_names):
+            row["roster"] = "cross"
+
+
+def apply_roster_overrides(faction_key, rows, overrides):
+    """roster_overrides.txt: force a card's Roster Type on one faction
+    page. overrides: {(faction_key, unit Name lower): 'core'|'cross'}.
+    A card matches if any of its Names on this page is listed."""
+    if not faction_key or not overrides:
+        return
+    for row in rows:
+        _lines, members, card_names = row["_roster_ctx"]
+        names = set(card_names) | {m["name"] for m in members}
+        for n in names:
+            forced = overrides.get((faction_key, n.lower()))
+            if forced:
+                row["roster"] = forced
+                break
+
+
+def load_roster_overrides(path):
+    """'<faction>, <unit Name>, core|cross' per line (# comments OK).
+    <faction> is the faction's affiliation as written in the XML (e.g.
+    CIS, Republic). Returns {(faction lower, Name lower): value}."""
+    out = {}
+    if not path:
+        return out
+    with open(path, encoding="utf-8") as f:
+        for lineno, raw in enumerate(f, 1):
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) != 3 or parts[2].lower() not in ("core", "cross"):
+                print(f"  ! {path}:{lineno}: expected '<faction>, <unit Name>, core|cross', "
+                      f"skipping: {line!r}", file=sys.stderr)
+                continue
+            out[(parts[0].lower(), parts[1].lower())] = parts[2].lower()
+    return out
+
+
 # "Sort by: Unit Class" order. A card sorts by the first of its classes
 # found here; anything else (Transport, SpaceStructure, no class...)
 # goes after, then alphabetically.
@@ -248,7 +369,7 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
                    title=None, description=None, author=None, mod_icon_src=None,
                    gameplay_image_src=None, faction_logos=None, faction_logos_dir=None,
                    custom_unit_order=None, structure_names=None, galaxy=None,
-                   eras=None, easter_eggs=None, upgrade_links=None):
+                   eras=None, easter_eggs=None, upgrade_links=None, roster_overrides=None):
     """Returns (pages, unit_order_snapshot_text):
 
     pages is a list of (filename, html) pairs -- the first is always
@@ -658,9 +779,12 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
                 row["is_hero"] = False
             # Era filter tokens and Sort By keys (see page_script).
             row["era_tokens"] = " ".join(ERA_TOKENS[e] for e in (card_eras or []))
+            row["roster"] = roster_type(faction_key, lines, base_row["members"], card_names)
+            row["_roster_ctx"] = (lines, base_row["members"], card_names)
+            row["_is_garrison"] = bool(card_names) and all(is_garrison_name(n) for n in card_names)
             row_html = row_html.replace(
                 ' data-build="',
-                f' data-era="{row["era_tokens"]}" data-sort-name="{escape(base_row["display_label"].lower())}"'
+                f' data-era="{row["era_tokens"]}" data-roster="__ROSTER__" data-sort-name="{escape(base_row["display_label"].lower())}"'
                 f' data-class-rank="{class_sort_rank(base_row["classes"])}"'
                 f' data-tech="{tech_sort_value(lines)}"'
                 f' data-cost="{_sort_attr(base_row.get("sort_cost"))}"'
@@ -670,6 +794,12 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
             row["build"] = build_summary
             row["build_tokens"] = build_tokens
             rows.append(row)
+
+        # Garrison cards' Roster Type depends on the other cards' result.
+        apply_garrison_roster(faction_key, rows)
+        apply_roster_overrides(faction_key, rows, roster_overrides)
+        for row in rows:
+            row["html"] = row["html"].replace('data-roster="__ROSTER__"', f'data-roster="{row["roster"]}"', 1)
 
         # Bucket THIS faction's rows by source file, same reasoning as
         # the old single-page version: entries defined in the same XML
@@ -688,6 +818,7 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
         limited_rows = []
         any_easter_egg = False
         era_token_seen = set()
+        roster_seen = set()
         eggs_by_source = {}  # kept out of visible counts so they stay a surprise
         for row in rows:
             if row["source"] not in rows_by_source:
@@ -704,6 +835,8 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
                 any_easter_egg = True
             build_token_seen.update(row["build_tokens"].split())
             era_token_seen.update(row["era_tokens"].split())
+            if row["roster"]:
+                roster_seen.add(row["roster"])
             if row.get("is_easter_egg"):
                 eggs_by_source[row["source"]] = eggs_by_source.get(row["source"], 0) + 1
             elif row["build"]["limited"]:
@@ -769,8 +902,10 @@ def generate_html(registry, hardpoints_defs, images_dir, image_ext,
         ]
 
         era_options = [(t, label) for t, label in ERA_FILTER_OPTIONS if t in era_token_seen]
+        roster_options = [(t, label) for t, label in ROSTER_FILTER_OPTIONS if t in roster_seen]
 
         filters_html = "".join([
+            render_filter_group("Roster Type", "roster", roster_options),
             render_filter_group("Era", "era", era_options),
             render_filter_group("Build rules", "build", build_options),
             render_filter_group("Class", "class", class_options),

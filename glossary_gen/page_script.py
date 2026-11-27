@@ -27,6 +27,7 @@ function applyFilter() {
   const buildSel = checkedValues('build');
   const kindSel = checkedValues('unitkind');
   const eraSel = checkedValues('era');
+  const rosterSel = checkedValues('roster');
 
   allRows.forEach(r => {
     const nameMatch = !q || r.dataset.name.includes(q);
@@ -42,7 +43,8 @@ function applyFilter() {
     // Easter eggs stay hidden (even from search) until their own
     // Unit Type filter is ticked, so they remain a surprise.
     const eggOk = r.dataset.unitKind !== 'easteregg' || kindSel.includes('easteregg');
-    const match = nameMatch && affMatch && classMatch && buildMatch && kindMatch && eraMatch && eggOk;
+    const rosterMatch = rosterSel.length === 0 || rosterSel.includes(r.dataset.roster);
+    const match = nameMatch && affMatch && classMatch && buildMatch && kindMatch && eraMatch && rosterMatch && eggOk;
     r.style.display = match ? '' : 'none';
   });
   fileGroups.forEach(g => {

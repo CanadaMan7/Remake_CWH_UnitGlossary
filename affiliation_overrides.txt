@@ -107,7 +107,7 @@ TIE_Turbo,Warlords
 Venator_Command_Template_Empire,Empire
 Mk6_Bomber_Squadron,Sith
 Sith_Fighter_Squadron,Sith
-Yull_Cruiser_Pirate,CIS
+Yull_Cruiser_Pirate,Neutral
 Panaka_Arquitens,Republic
 Space_LAAT_Squadron,Republic
 Space_LAAT_Squadron_E,Empire

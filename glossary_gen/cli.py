@@ -97,7 +97,7 @@ from .build_rules import load_structure_names, load_structure_name_overrides
 from .galaxy import load_galaxy
 from .eras import load_eras
 from .upgrades import load_upgrade_links
-from .html_output import generate_html
+from .html_output import generate_html, load_roster_overrides
 
 
 def find_used_image_filenames(pages, images_base):
@@ -232,7 +232,8 @@ def main():
                           "'<exact unit Name>,<image filename1>[,<image filename2>,...]' pair "
                           "per line (# comments and blank lines OK). Shows the given filename(s) "
                           "-- looked up under --in-game-images-dir exactly as given, extension "
-                          "included -- as screenshot thumbnails (click one to view it full-size "
+                          "included (or used as-is when it is a full http(s) URL, such as a ModDB image) "
+                          "-- as screenshot thumbnails (click one to view it full-size "
                           "in a page-wide modal) under that unit's/squadron's own icon gallery. "
                           "Multiple files layer in order, later OVERWRITING (not merging with) "
                           "an earlier file's list for the same unit Name.")
@@ -339,6 +340,9 @@ def main():
                      help="Text file, one unit Name per line (# comments allowed). Cards "
                           "containing any of them get the Unit Type 'Easter Egg' instead of "
                           "'Unique Hero'.")
+    ap.add_argument("--roster-overrides", default=None,
+                     help="Text file of '<faction>, <unit Name>, core|cross' lines (# comments "
+                          "allowed) that force a unit's Roster Type on that faction's page.")
     ap.add_argument("--galaxy-planets-file", default="Planets_WW.xml",
                      help="Planet definitions file name to look for in --galaxy-data-dirs.")
     args = ap.parse_args()
@@ -530,6 +534,14 @@ def main():
             sys.exit(1)
         print(f"  loaded {len(easter_eggs)} easter egg name(s) from {args.easter_eggs_file}")
 
+    try:
+        roster_overrides = load_roster_overrides(args.roster_overrides)
+    except OSError as e:
+        print(f"! could not read --roster-overrides {args.roster_overrides}: {e}", file=sys.stderr)
+        sys.exit(1)
+    if roster_overrides:
+        print(f"  loaded {len(roster_overrides)} roster override(s) from {args.roster_overrides}")
+
     images_base = resolve_images_base(args.images_dir)
     if images_base != args.images_dir:
         print(f"Resolved --images-dir to: {images_base}")
@@ -588,6 +600,7 @@ def main():
         eras=eras,
         easter_eggs=easter_eggs,
         upgrade_links=upgrade_links,
+        roster_overrides=roster_overrides,
     )
 
     output_dir = os.path.dirname(args.output) or "."
